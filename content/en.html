@@ -10,20 +10,10 @@
 </header>
 
 <h2 id="introduction">Introduction</h2>
+<p>The goal of this document is to provide educators with a highly intuitive, visually memorable framework for teaching the Master Theorem.</p>
+<p>The initial sections, "The Divide and Conquer Strategy" and "Building the Recursion Tree," establish the foundational intuition behind the recursive formula and its tree-graph representation. While standard derivations of these concepts exist across many resources, they are included here to lay the necessary groundwork.</p>
+<p>The core novelty of this guide lies in the final section: <strong>translating the three cases of the Master Theorem into three distinct geometric shapes</strong>—a triangle, a rectangle, and an inverted triangle.</p>
 
-<p data-audience="student">The goal of this document is to provide students and educators with a highly intuitive, visually memorable framework for teaching and learning the Master Theorem.</p>
-
-<section class="edu-block" data-audience="educator">
-  <span class="edu-tag">For educators</span>
-  <h3 id="story">The Story Behind the Interpretation</h3>
-  <p>When I first encountered the Master Theorem in the Data Structures course at the Hebrew University, I struggled with its heavily algebraic and seemingly arbitrary cases. Realizing that rote memorization wouldn't stick for my oral exams, I searched for a more intuitive approach. Once I realized the core logic simply compares the dominant workload—whether at the root or the leaves—I developed the geometric interpretation presented in this document.</p>
-  <p>A year later, while tutoring a first-year student for that exact same exam, I recalled this geometric trick. Seeing how quickly it helped her—and subsequently, my peers—grasp the concept, I realized its broader educational potential. I decided to formalize this analogy to share with the course staff and future students.</p>
-
-  <h3 id="for-educators">For Educators</h3>
-  <p>The goal of this document is to provide educators with a highly intuitive, visually memorable framework for teaching the Master Theorem.</p>
-  <p>The initial sections, "The Divide and Conquer Strategy" and "Building the Recursion Tree," establish the foundational intuition behind the recursive formula and its tree-graph representation. While standard derivations of these concepts exist across many resources, they are included here to lay the necessary groundwork.</p>
-  <p>The core novelty of this guide lies in the final section: <strong>translating the three cases of the Master Theorem into three distinct geometric shapes</strong>—a triangle, a rectangle, and an inverted triangle.</p>
-</section>
 
 <h2 id="divide-and-conquer">The Divide and Conquer Strategy</h2>
 <p>The Master Theorem is a tool used to analyze the runtime of algorithms that employ a <strong>divide and conquer</strong> strategy. Instead of solving a massive problem all at once, these algorithms do three things:</p>

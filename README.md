@@ -13,7 +13,7 @@ $T(n) = aT(n/b) + f(n)$, then turns the theorem's three cases into three shapes 
 
 The site has two toggles:
 - **Language:** English / עברית (right-to-left layout).
-- **Audience:** Student / Educator. Educator mode adds the background story and inline "Educator Tip" boxes.
+- **Audience:** Student / Educator. Educator mode adds inline "Educator Tip" boxes.
 
 Each combination can be downloaded as a PDF compiled from the original LaTeX.
 

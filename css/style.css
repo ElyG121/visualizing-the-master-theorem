@@ -133,11 +133,6 @@ main { min-width: 0; max-width: 780px; padding: 24px 0 64px; }
 /* ---------- Audience switching ---------- */
 html[data-mode="student"] [data-audience="educator"],
 html[data-mode="educator"] [data-audience="student"] { display: none !important; }
-.edu-tag {
-  display: inline-block; font-size: .7rem; font-weight: 600; letter-spacing: .05em; text-transform: uppercase;
-  color: var(--primary); border: 1px solid currentColor; border-radius: 999px; padding: 0 8px; margin-bottom: 8px;
-}
-html[lang="he"] .edu-tag { text-transform: none; letter-spacing: 0; }
 
 /* ---------- Typography ---------- */
 .hero { padding: 24px 0 8px; border-bottom: 1px solid var(--border); margin-bottom: 8px; }
@@ -153,8 +148,6 @@ p { margin: 0 0 14px; }
 ul, ol { padding-inline-start: 24px; margin: 0 0 14px; }
 li { margin-bottom: 6px; }
 li > ul { margin-top: 6px; }
-section.edu-block { border-inline-start: 3px solid var(--primary); padding-inline-start: 16px; margin-top: 32px; }
-section.edu-block > h2:first-of-type, section.edu-block > h3:first-of-type { margin-top: 4px; }
 
 /* ---------- Condition boxes (tcolorbox) ---------- */
 .condition { border: 1.5px solid var(--c); border-radius: 8px; overflow: hidden; margin: 12px 0 18px; background: color-mix(in srgb, var(--c) 10%, var(--bg)); }
