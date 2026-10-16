@@ -35,10 +35,10 @@ jobs:
             latexmk -xelatex -interaction=nonstopmode -halt-on-error -outdir=build "latex_src_files/$1.tex"
             cp "build/$1.pdf" "_site/pdf/$2.pdf"
           }
-          compile teaching_the_master_theorem              en-educator
-          compile teaching_the_master_theorem_students     en-student
-          compile teaching_the_master_theorem_heb          he-educator
-          compile teaching_the_master_theorem_students_heb he-student
+          compile educators_en  en-educator
+          compile students_en   en-student
+          compile educators_heb he-educator
+          compile students_heb  he-student
 
       - name: Assemble site
         run: cp -r index.html css js content _site/

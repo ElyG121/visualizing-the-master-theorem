@@ -218,3 +218,9 @@ figcaption { color: var(--muted); font-size: .9rem; margin-top: 10px; text-align
 .eq-he { text-align: center; margin: 16px 0; font-size: 1.05rem; }
 /* Embedded English inside Hebrew text keeps its own direction */
 [dir="rtl"] [lang="en"] { unicode-bidi: isolate; }
+
+/* Educator tip boxes (LaTeX "educatortip": primary frame, light primary background) */
+.edu-tip { --c: var(--primary); background: color-mix(in srgb, var(--primary) 6%, var(--bg)); margin: 16px 0 22px; }
+.edu-tip .cond-body ul { margin: 0; }
+.edu-tip .cond-body li:last-child { margin-bottom: 0; }
+.hero .byline { margin: -8px 0 16px; font-weight: 600; color: var(--muted); }

@@ -7,3 +7,5 @@ build/
 *.fdb_latexmk
 *.xdv
 *.out
+Master_Theorem.zip
+*:Zone.Identifier

@@ -13,14 +13,14 @@ $T(n) = aT(n/b) + f(n)$, then turns the theorem's three cases into three shapes 
 
 The site has two toggles:
 - **Language:** English / עברית (right-to-left layout).
-- **Audience:** Student / Educator. Educator mode adds the background story and teaching tips.
+- **Audience:** Student / Educator. Educator mode adds the background story and inline "Educator Tip" boxes.
 
 Each combination can be downloaded as a PDF compiled from the original LaTeX.
 
 ## Repository layout
 
 ```
-latex_src_files/   original XeLaTeX sources (educator + student, English + Hebrew)
+latex_src_files/   XeLaTeX sources: educators_en, students_en, educators_heb, students_heb
 index.html         site shell
 content/           hand-converted content: en.html, he.html
 js/app.js          language/audience toggles, table of contents, KaTeX rendering

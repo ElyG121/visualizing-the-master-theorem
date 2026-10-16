@@ -23,8 +23,8 @@
 \definecolor{accent3}{RGB}{245, 158, 11} % Amber for balanced
 
 \title{\Huge \textbf{The Geometry of the Master Theorem}}
-\author{A Visual Guide to Divide and Conquer}
-\date{}
+\author{\Large A Visual Guide to Divide and Conquer \\ \vspace{0.2cm} \large Ely Grunfeld}
+\date{} % Leave empty to hide the date, or insert \today
 
 \begin{document}
 
@@ -160,7 +160,7 @@ Mapping these variables to our examples:
 To establish the complete runtime $T(n)$, we define a base case and construct the general equation by adding its two core components:
 
 \begin{itemize}
-    \item Time spent on recursive work: Because each subproblem is exactly the same as the initial problem but reduced to a size of $\frac{n}{b}$, solving just one takes $T\left(\frac{n}{b}\right)$ time. Since the algorithm generates $a$ of these subproblems, we multiply them to find the total recursive time: $aT\left(\frac{n}{b}\right)$.
+    \item Time spent on recursive work: Because each subproblem is exactly the same as the initial problem but reduced to a size of $\frac{n}{b}$, solving just one takes $T\left(\frac{n}{b}\right)$ time. Since the algorithm generates $a$ of these subproblems, we multiply to find the total recursive time: $aT\left(\frac{n}{b}\right)$.
 
     \item Overhead work: $f(n)$, which accounts for the time spent physically dividing the problem and combining the recursive answers. 
 
