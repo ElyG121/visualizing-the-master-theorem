@@ -1,0 +1,509 @@
+% !TEX program = xelatex
+\documentclass[11pt, a4paper]{article}
+
+\usepackage[a4paper, margin=2.5cm]{geometry}
+\usepackage[no-math]{fontspec} % [no-math] prevents the text font from breaking math symbols
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{tikz}
+\usetikzlibrary{decorations.pathreplacing}
+\usepackage{tcolorbox}
+\usepackage{xcolor}
+\usepackage[none]{hyphenat}
+
+% Hebrew Support for XeLaTeX
+\usepackage{polyglossia}
+\setdefaultlanguage{hebrew}
+\setotherlanguage{english}
+
+% --- FONT SETUP ---
+% Arial is used because it perfectly supports Hebrew, digits, and all punctuation.
+% IF YOU ARE USING OVERLEAF: Change "Arial" to "Liberation Sans" or "Assistant".
+\setmainfont{Liberation Sans}
+\newfontfamily\hebrewfont[Script=Hebrew]{Liberation Sans}
+\newfontfamily\hebrewfontsf[Script=Hebrew]{Liberation Sans}
+\newfontfamily\englishfont{Liberation Sans}
+
+% Force bullet points to use the math bullet so they never render as empty boxes
+\renewcommand{\labelitemi}{$\bullet$}
+\renewcommand{\labelitemii}{$\circ$}
+
+\definecolor{primary}{RGB}{37, 99, 235}
+\definecolor{secondary}{RGB}{71, 85, 105}
+\definecolor{accent1}{RGB}{16, 185, 129} % Green for leaves
+\definecolor{accent2}{RGB}{239, 68, 68}  % Red for root
+\definecolor{accent3}{RGB}{245, 158, 11} % Amber for balanced
+
+\title{\Huge \textbf{הגיאומטריה של משפט האב}}
+\author{מדריך ויזואלי לאלגוריתמי הפרד ומשול}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section*{מבוא}
+
+\subsection*{הסיפור מאחורי הפרשנות}
+כאשר נתקלתי לראשונה במשפט האב (\textenglish{Master Theorem}) בקורס מבני נתונים באוניברסיטה העברית, התקשיתי עם המקרים העמוסים באלגברה שנראו שרירותיים. כשהבנתי ששינון לא יעזור לי בבחינות בעל פה, חיפשתי גישה אינטואיטיבית יותר. ברגע שהבנתי שההיגיון המרכזי פשוט משווה את עומס העבודה השולט - בין אם בשורש או בעלים - פיתחתי את הפרשנות הגיאומטרית המוצגת במסמך זה.
+
+שנה לאחר מכן, בזמן שחנכתי סטודנטית שנה א' לאותה בחינה בדיוק, נזכרתי בטריק הגיאומטרי הזה. כשראיתי כמה זה עזר לה - ולאחר מכן, לעמיתיי - לתפוס את המושג, הבנתי את הפוטנציאל החינוכי הרחב יותר שלו. החלטתי למסד את האנלוגיה הזו כדי לשתף אותה עם סגל הקורס ועם סטודנטים עתידיים.
+
+\subsection*{עבור צוות ההוראה}
+מטרת מסמך זה היא לספק למורים ולמתרגלים מסגרת אינטואיטיבית, ויזואלית וקלה להוראת משפט האב.
+
+החלקים הראשונים, "אסטרטגיית הפרד ומשול" ו"בניית עץ הרקורסיה", מבססים את האינטואיציה מאחורי הנוסחה הרקורסיבית והייצוג שלה כעץ. למרות שפיתוחים סטנדרטיים של מושגים אלו קיימים במקורות רבים, הם נכללים כאן כדי להניח את התשתית הנדרשת.
+
+החידוש המרכזי של מדריך זה טמון בסעיף האחרון: \textbf{תרגום שלושת המקרים של משפט האב לשלוש צורות גיאומטריות נפרדות} — משולש, מלבן ומשולש הפוך.
+
+\newpage
+\section*{אסטרטגיית הפרד ומשול}
+
+משפט האב הוא כלי המשמש לניתוח זמן הריצה של אלגוריתמים המשתמשים באסטרטגיית \textbf{הפרד ומשול} (\textenglish{Divide and Conquer}). במקום לפתור בעיה ענקית בבת אחת, אלגוריתמים אלו מבצעים שלושה שלבים:
+\begin{enumerate}
+    \item \textbf{הפרד:} פיצול הבעיה הגדולה למספר תתי-בעיות קטנות וזהות.
+    \item \textbf{משול:} פתרון תתי-הבעיות הללו באופן רקורסיבי.
+    \item \textbf{שלב:} חיבור הפתרונות של תתי-הבעיות יחד ליצירת התשובה הסופית.
+\end{enumerate}
+
+כדי להמחיש זאת, נסתכל על שתי דוגמאות קלאסיות לאלגוריתמי הפרד ומשול. \textbf{מיון מיזוג} (\textenglish{Merge Sort}) מפצל מערך לשני חצאים באופן רקורסיבי עד שכל איבר מבודד, ולאחר מכן ממזג את תתי-המערכים הממוינים חזרה ליצירת הפלט הממוין הסופי. \textbf{חיפוש בינארי} (\textenglish{Binary Search}) מאתר ערך יעד במערך ממוין על ידי חציית טווח החיפוש שוב ושוב, וחיפוש רקורסיבי רק בחצי שבו ערך היעד יכול להימצא.
+
+\begin{figure}[htpb!]
+    \centering
+    \begin{tikzpicture}[scale=0.85, transform shape]
+        % Define Case 2 (Rectangle) colors
+        \definecolor{case2blue}{RGB}{74,118,193}
+        \definecolor{case2light}{RGB}{186,223,233}
+        \definecolor{case2border}{RGB}{43,76,134}
+
+        % --- MERGE SORT ---
+        \node at (-2.0, 6.0) {\Large \sffamily \textenglish{Merge Sort}};
+
+        % Triangles Layer 1 -> Layer 2
+        \fill[case2light] (-4.0, 4.5) -- (-2.0, 4.5) -- (-3.4, 3.6) -- cycle;
+        \fill[case2light] (-2.0, 4.5) -- (0.0, 4.5) -- (-0.6, 3.6) -- cycle;
+
+        % Triangles Layer 2 -> Layer 3
+        \fill[case2light] (-4.4, 3.0) -- (-3.4, 3.0) -- (-4.1, 2.1) -- cycle;
+        \fill[case2light] (-3.4, 3.0) -- (-2.4, 3.0) -- (-2.7, 2.1) -- cycle;
+        \fill[case2light] (-1.6, 3.0) -- (-0.6, 3.0) -- (-1.3, 2.1) -- cycle;
+        \fill[case2light] (-0.6, 3.0) -- (0.4, 3.0) -- (0.1, 2.1) -- cycle;
+
+        % Triangles Layer 3 -> Layer 4
+        \fill[case2light] (-4.6, 1.5) -- (-4.1, 1.5) -- (-4.45, 0.6) -- cycle;
+        \fill[case2light] (-4.1, 1.5) -- (-3.6, 1.5) -- (-3.75, 0.6) -- cycle;
+        \fill[case2light] (-3.2, 1.5) -- (-2.7, 1.5) -- (-3.05, 0.6) -- cycle;
+        \fill[case2light] (-2.7, 1.5) -- (-2.2, 1.5) -- (-2.35, 0.6) -- cycle;
+        \fill[case2light] (-1.8, 1.5) -- (-1.3, 1.5) -- (-1.65, 0.6) -- cycle;
+        \fill[case2light] (-1.3, 1.5) -- (-0.8, 1.5) -- (-0.95, 0.6) -- cycle;
+        \fill[case2light] (-0.4, 1.5) -- (0.1, 1.5) -- (-0.25, 0.6) -- cycle;
+        \fill[case2light] (0.1, 1.5) -- (0.6, 1.5) -- (0.45, 0.6) -- cycle;
+
+        % Boxes Layer 1 (Size 8 array)
+        \foreach \x in {-4.0, -3.5, -3.0, -2.5, -2.0, -1.5, -1.0, -0.5} {
+            \draw[thick, case2border, fill=case2blue] (\x, 4.5) rectangle (\x+0.5, 5.1);
+        }
+
+        % Boxes Layer 2 (Two Size 4 arrays)
+        \foreach \x in {-4.4, -3.9, -3.4, -2.9, -1.6, -1.1, -0.6, -0.1} {
+            \draw[thick, case2border, fill=case2blue] (\x, 3.0) rectangle (\x+0.5, 3.6);
+        }
+
+        % Boxes Layer 3 (Four Size 2 arrays)
+        \foreach \x in {-4.6, -4.1, -3.2, -2.7, -1.8, -1.3, -0.4, 0.1} {
+            \draw[thick, case2border, fill=case2blue] (\x, 1.5) rectangle (\x+0.5, 2.1);
+        }
+
+        % Boxes Layer 4 (Eight Size 1 arrays)
+        \foreach \x in {-4.7, -4.0, -3.3, -2.6, -1.9, -1.2, -0.5, 0.2} {
+            \draw[thick, case2border, fill=case2blue] (\x, 0.0) rectangle (\x+0.5, 0.6);
+        }
+
+
+        % --- BINARY SEARCH ---
+        \node at (6.0, 6.0) {\Large \sffamily \textenglish{Binary Search}};
+
+        % Triangle L1 -> L2 (Picking the Left Half)
+        \fill[case2light] (4.0, 4.5) -- (6.0, 4.5) -- (4.6, 3.6) -- cycle;
+        
+        % Triangle L2 -> L3 (Picking the Right Half)
+        \fill[case2light] (4.6, 3.0) -- (5.6, 3.0) -- (5.3, 2.1) -- cycle;
+
+        % Triangle L3 -> L4 (Picking the Left Half)
+        \fill[case2light] (4.8, 1.5) -- (5.3, 1.5) -- (4.95, 0.6) -- cycle;
+
+        % Boxes Layer 1 (Size 8 array)
+        \foreach \x in {4.0, 4.5, 5.0, 5.5, 6.0, 6.5, 7.0, 7.5} {
+            \draw[thick, case2border, fill=case2blue] (\x, 4.5) rectangle (\x+0.5, 5.1);
+        }
+
+        % Boxes Layer 2 (One Size 4 array)
+        \foreach \x in {3.6, 4.1, 4.6, 5.1} {
+            \draw[thick, case2border, fill=case2blue] (\x, 3.0) rectangle (\x+0.5, 3.6);
+        }
+
+        % Boxes Layer 3 (One Size 2 array)
+        \foreach \x in {4.8, 5.3} {
+            \draw[thick, case2border, fill=case2blue] (\x, 1.5) rectangle (\x+0.5, 2.1);
+        }
+
+        % Boxes Layer 4 (One Size 1 array)
+        \foreach \x in {4.7} {
+            \draw[thick, case2border, fill=case2blue] (\x, 0.0) rectangle (\x+0.5, 0.6);
+        }
+
+    \end{tikzpicture}
+    \caption{מיון מיזוג מתפצל כדי לעבד את כל תתי-הבעיות, בהשוואה לחיפוש בינארי שעוקב אחר מסלול של תת-בעיה אחת בלבד.}
+\end{figure}
+\subsection*{פיתוח הנוסחה}
+
+אסטרטגיית הפרד ומשול היא רקורסיבית מיסודה מכיוון שתתי-הבעיות שהיא מייצרת הן פשוט מופעים קטנים יותר של הבעיה המקורית, מה שמאפשר לאלגוריתם לקרוא לעצמו כדי לפתור אותן. כתוצאה מכך, אנו יכולים לפתח נוסחה רקורסיבית לתיאור זמן הריצה של אלגוריתמים אלו. נגדיר את המשתנים הבאים:
+\begin{itemize}
+    \item $n$: הגודל של הבעיה המקורית שלנו.
+    \item $T$: פונקציית זמן הריצה הכולל. לדוגמה, הערכת פונקציה זו עבור קלט $n$, הנכתבת כ-$T(n)$, נותנת את הזמן הכולל שלוקח לפתור בעיה בגודל $n$.
+    \item $a$: מספר תתי-הבעיות שאליהן אנו מפצלים את הבעיה הגדולה (כאשר $a \ge 1$).
+    \item $b$: הגורם שבו גודל הבעיה מצטמצם. לדוגמה, אם נחתוך את הבעיה לחצי, $b = 2$. המשמעות היא שכל תת-בעיה חדשה היא בגודל $n/b$ (כאשר $b > 1$).
+    \item $f$: פונקציית עבודת "התקורה" (\textenglish{Overhead}). לדוגמה, $f(n)$ מייצג את הזמן הנדרש כדי לפצל פיזית בעיה בגודל $n$ בהתחלה, בתוספת הזמן הנדרש לשלב את כל התשובות של תתי-הבעיות בסוף.
+\end{itemize}
+\newpage
+מיפוי המשתנים הללו לדוגמאות שלנו:
+\begin{itemize}
+    \item מיון מיזוג מחלק את המערך לשניים ($b=2$), קורא לעצמו רקורסיבית על שני החצאים ($a=2$), וממזג בזמן ליניארי ($f(n) = \Theta(n)$).
+
+    \item חיפוש בינארי גם הוא חוצה את המערך ($b=2$), אך ממשיך רקורסיבית רק על חצי אחד ($a=1$) עם עבודת תקורה קבועה ($f(n) = \Theta(1)$).
+\end{itemize}
+
+
+כדי לבסס את זמן הריצה הכולל $T(n)$, נגדיר מקרה בסיס ונבנה את המשוואה הכללית על ידי חיבור שני רכיבי הליבה שלה:
+
+\begin{itemize}
+    \item זמן המוקדש לעבודה רקורסיבית: מכיוון שכל תת-בעיה זהה לחלוטין לבעיה המקורית אך מצומצמת לגודל של $\frac{n}{b}$, פתרון של אחת בלבד לוקח זמן $T\left(\frac{n}{b}\right)$. מכיוון שהאלגוריתם מייצר $a$ תתי-בעיות כאלו, נכפיל אותן כדי למצוא את הזמן הרקורסיבי הכולל: $aT\left(\frac{n}{b}\right)$.
+
+    \item עבודת תקורה: $f(n)$, אשר מהווה את הזמן המושקע בפיצול הפיזי של הבעיה ושילוב התשובות הרקורסיביות.
+
+    \item עיגון הנוסחה הרקורסיבית: כדי לעגן פורמלית את הרקורסיה הזו, נניח מקרה בסיס של $T(1) = \Theta(1)$ ו-$f(1) = \Theta(1)$. המשמעות היא שכאשר גודל הבעיה מצטמצם לאיבר בודד, האלגוריתם דורש זמן קבוע כדי לעבד אותו ואין צורך בחלוקה נוספת.
+\end{itemize}
+
+השוואת הזמן הכולל $T(n)$ לעבודה הרקורסיבית בתוספת עבודת התקורה בונה באופן טבעי את נוסחת הנסיגה הסטנדרטית שלנו:
+\[T(n)=\begin{cases}
+    \Theta(1)  & n = 1 \\
+   aT(\frac{n}{b})+f(n) & n>1
+\end{cases}
+\]
+
+כדי להימנע משימוש בפונקציות עיגול כמו רצפה ותקרה (\textenglish{Floor \& Ceiling}), נניח ש-$n$ הוא חזקה מדויקת של $b$. בעוד שפישוט זה שומר על מתמטיקה נקייה, ההסבר ומשפט האב נכונים גם כאשר $n$ אינו חזקה מדויקת של $b$. מכיוון שהמטרה הסופית שלנו היא לנתח התנהגות אסימפטוטית, השמטת פונקציות העיגול הללו אינה משנה את חסמי הסיבוכיות הסופיים.
+
+החלת הנוסחה הכללית הזו על הדוגמאות הקודמות שלנו מניבה את נוסחאות הנסיגה המדויקות שלהן:
+\begin{itemize}
+    \item \textbf{מיון מיזוג:} $T(n) = 2T\left(\frac{n}{2}\right) + \Theta(n)$
+    \item \textbf{חיפוש בינארי:} $T(n) = T\left(\frac{n}{2}\right) + \Theta(1)$
+\end{itemize}
+
+המטרה שלנו היא לפתור את נוסחת הנסיגה הזו כדי למצוא את ההתנהגות האסימפטוטית של $T(n)$ ישירות במונחים של $n$. כדי להשיג זאת, נוכל להמחיש ויזואלית את העבודה הכוללת שמבצע האלגוריתם באמצעות \textbf{עץ רקורסיה}.
+\newpage
+\section*{בניית עץ הרקורסיה}
+כאשר אנו פורסים את נוסחת הנסיגה, אנו יוצרים מבנה עץ שבו כל צומת מייצג את העלות של תת-בעיה בודדת.
+
+\begin{figure}[htpb!]
+    \centering
+    \begin{tikzpicture}[scale=0.75, transform shape]
+        
+        % Root Node
+        \node (root) at (0,0) {$f(n)$};
+        
+        % Level 1 Nodes - Spread out horizontally to prevent overlap
+        \node (L1a) at (-6.5,-2) {$f(n/b)$};
+        \node (L1b) at (-1.5,-2) {$f(n/b)$};
+        \node (L1c) at (2.5,-2) {$\cdots$};
+        \node (L1d) at (6.5,-2) {$f(n/b)$};
+        
+        \draw (root) -- (L1a);
+        \draw (root) -- (L1b);
+        \draw (root) -- (L1d);
+        
+        % Arc for 'a' branches at root
+        \draw (-2,-0.5) to[bend right=20] (2,-0.5);
+        \node at (0,-1.1) {$a$};
+        
+        % Level 2 for L1a
+        \node (L2a1) at (-8,-4) {$f(n/b^2)$};
+        \node (L2a2) at (-6.5,-4) {$\cdots$};
+        \node (L2a3) at (-5,-4) {$f(n/b^2)$};
+        \draw (L1a) -- (L2a1);
+        \draw (L1a) -- (L2a3);
+        \draw (-7.2,-2.6) to[bend right=20] (-5.8,-2.6);
+        \node at (-6.5,-2.9) {$a$};
+
+        % Level 2 for L1b
+        \node (L2b1) at (-3,-4) {$f(n/b^2)$};
+        \node (L2b2) at (-1.5,-4) {$\cdots$};
+        \node (L2b3) at (0,-4) {$f(n/b^2)$};
+        \draw (L1b) -- (L2b1);
+        \draw (L1b) -- (L2b3);
+        \draw (-2.2,-2.6) to[bend right=20] (-0.8,-2.6);
+        \node at (-1.5,-2.9) {$a$};
+        
+        % Level 2 for L1d
+        \node (L2d1) at (5,-4) {$f(n/b^2)$};
+        \node (L2d2) at (6.5,-4) {$\cdots$};
+        \node (L2d3) at (8,-4) {$f(n/b^2)$};
+        \draw (L1d) -- (L2d1);
+        \draw (L1d) -- (L2d3);
+        \draw (5.8,-2.6) to[bend right=20] (7.2,-2.6);
+        \node at (6.5,-2.9) {$a$};
+
+        % Vertical Dots continuing downward
+        \node at (-6.5,-5) {$\vdots$};
+        \node at (-1.5,-5) {$\vdots$};
+        \node at (2.5,-5) {$\vdots$};
+        \node at (6.5,-5) {$\vdots$};
+        
+        % Leaf Nodes \cdots for the gaps
+        \node at (-6.5,-6) {$\cdots$};
+        \node at (-1.5,-6) {$\cdots$};
+        \node at (2.5,-6) {$\cdots$};
+        \node at (6.5,-6) {$\cdots$};
+
+        % Level 3 Branches and Theta(1) Leaves
+        \foreach \x in {-8, -5, -3, 0, 5, 8} {
+            % Solid branch lines (narrowed slightly to completely eliminate overlap)
+            \draw (\x, -4.3) -- (\x-0.45, -5.0);
+            \draw (\x, -4.3) -- (\x+0.45, -5.0);
+            
+            % Arc and 'a' label
+            \draw (\x-0.3, -4.6) to[bend right=20] (\x+0.3, -4.6);
+            \node at (\x, -4.85) {\small $a$};
+            
+            % Dashed continuation
+            \draw[dashed, thin] (\x-0.45, -5.0) -- (\x-0.45, -5.6);
+            \draw[dashed, thin] (\x+0.45, -5.0) -- (\x+0.45, -5.6);
+            
+            % Dots between dashed lines
+            \node at (\x, -5.3) {\small $\dots$};
+            
+            % Theta(1) leaves properly aligned to branches
+            \node at (\x-0.45, -6) {$\Theta(1)$};
+            \node at (\x+0.45, -6) {$\Theta(1)$};
+        }
+
+        % Row Sums on the right side
+        \node[anchor=west] (sum0) at (10,0) {$f(n)$};
+        \node[anchor=west] (sum1) at (10,-2) {$a f(n/b)$};
+        \node[anchor=west] (sum2) at (10,-4) {$a^2 f(n/b^2)$};
+        \node[anchor=west] (sum3) at (10,-6) {$\Theta(n^{\log_b a})$};
+        
+        \draw[densely dotted, thick, -stealth] (root) -- (sum0);
+        \draw[densely dotted, thick, -stealth] (L1d) -- (sum1);
+        \draw[densely dotted, thick, -stealth] (L2d3) -- (sum2);
+        
+        % Dotted line shifted to start safely to the right of the last Theta(1)
+        \draw[densely dotted, thick, -stealth] (9.0,-6) -- (sum3);
+
+        % Depth Arrow on the left
+        \draw[stealth-stealth] (-9.5,0) -- (-9.5,-6) node[midway, fill=white] {$\log_b n$};
+
+        % Curly Brace and Leaf Count at the bottom
+        \draw[decorate, decoration={brace, amplitude=10pt, mirror}, thick] 
+            (-8.6,-6.3) -- (8.6,-6.3) node[midway, below=12pt] {$n^{\log_b a}$};
+            
+        % Final Total Sum at bottom right
+        \node[anchor=west] at (5,-7.8) {Total: $\Theta(n^{\log_b a}) + \displaystyle\sum_{j=0}^{\log_b n - 1} a^j f(n/b^j)$};
+
+    \end{tikzpicture}
+    \caption{עץ הרקורסיה הנוצר על ידי $T(n) = aT(n/b) + f(n)$. העץ הוא עץ $a$-ארי שלם עם $n^{\log_b a}$ עלים וגובה של $\log_b n$. עלות הצמתים בכל עומק מוצגת בצד ימין. מבנה האיור עובד מתוך הספר \textenglish{\textit{Introduction to Algorithms}} מאת \textenglish{Cormen et al.}}
+\end{figure}
+    
+\subsubsection*{ברמת השורש (רמה 0):}
+\begin{itemize}
+    \item \textbf{מספר תתי-הבעיות:} $1 = a^0$ (רק הבעיה המקורית, ללא חלוקה).
+    \item \textbf{גודל תת-הבעיה:} $n = \frac{n}{b^0}$.
+    \item \textbf{העבודה המבוצעת ברמה זו:} $f(n)$. עבודה זו מייצגת את המאמץ החישובי הנדרש כדי לחלק את הבעיה הראשונית ובסופו של דבר לשלב את התשובות מהענפים שמתחת.
+\end{itemize}
+
+\subsubsection*{ברמה 1}
+אם גודל הבעיה ההתחלתי הוא $n$, ואנו מחלקים אותה ל-$a$ תתי-בעיות, כל אחת בגודל $n/b$, אזי ברמה הראשונה של הרקורסיה (רמה 1), יש לנו:
+\begin{itemize}
+    \item \textbf{מספר תתי-הבעיות:} $a = a^1$
+    \item \textbf{גודל כל תת-בעיה:} $\frac{n}{b} = \frac{n}{b^1}$
+\end{itemize}
+
+\subsubsection*{ברמה $i$}
+בהמשך לדפוס מהרמה הראשונה, ככל שאנו מעמיקים בעץ הרקורסיה, כל צומת ברמה $i-1$ מתפצל ל-$a$ צמתים חדשים ברמה $i$, וגודל הבעיה מחולק ב-$b$ בכל שלב. לכן, ברמה $i$, יש לנו:
+\begin{itemize}
+    \item \textbf{מספר תתי-הבעיות:} $a \cdot a^{i-1} = a^i$
+    \item \textbf{גודל כל תת-בעיה:} $\frac{n/b^{i-1}}{b} = \frac{n}{b^i}$
+\end{itemize}
+
+דפוס זה נמשך עד למקרי הבסיס (העלים של עץ הרקורסיה).
+
+
+\vspace{0.5cm}
+\noindent\textbf{ברמת העלים (בסיס העץ):}
+\begin{itemize}
+    \item \textbf{עומק העץ:} הרקורסיה נעצרת כאשר תתי-הבעיות קטנות מספיק לפתרון ישיר (גודל 1). זה קורה כאשר $n/b^h= 1$, כלומר תחתית העץ נמצאת בעומק $h = \log_b n$.
+    \item \textbf{מספר תתי-הבעיות (עלים):} בהמשך לדפוס שלנו, מספר הצמתים ברמה הסופית הזו הוא $a^{\log_b n}$. תוך שימוש בחוקי לוגריתמים סטנדרטיים, זה מתפשט מתמטית ל- $n^{\log_b a}$ :
+        \[ a^{\log_b n} = (b^{\log_b a})^{\log_b n} = (b^{\log_b n})^{\log_b a} = n^{\log_b a} \]
+    \item \textbf{גודל כל תת-בעיה:} $1$ (מקרה הבסיס).
+    \item \textbf{העבודה המבוצעת ברמה זו:} בהנחה שמקרה הבסיס דורש זמן קבוע $\Theta(1)$ לפתרון, ה"משקל" החישובי הכולל של רמת העלים כולה הוא בדיוק כמספר העלים, $\Theta(n^{\log_b a})$.
+\end{itemize}
+
+\subsection*{סיכום העבודה הכוללת} 
+מכיוון שאנו יודעים את מספר תתי-הבעיות ואת גודלן בכל רמה $i$, אנו יכולים לחשב את העבודה הכוללת המבוצעת ברמה הספציפית הזו על ידי הכפלת מספר הצמתים $a^i$ בפונקציית העלות $f$ של גודל כל תת-בעיה ברמה $i$, $\frac{n}{b^i}$:
+\[
+    \text{ level at Work} i = a^i f\left(\frac{n}{b^i}\right)
+\]
+
+כדי למצוא את זמן הריצה הכולל $T(n)$ של האלגוריתם, עלינו לסכם את העבודה המבוצעת לאורך כל רמות העץ, החל מהשורש (רמה 0) ועד לצמתי העלים בעומק $\log_b n$:
+\begin{equation*}
+    T(n) = \sum_{i=0}^{\log_b n} a^i f\left(\frac{n}{b^i}\right) = \sum_{i=0}^{\log_b n - 1} a^i f\left(\frac{n}{b^i}\right) + \Theta(n^{\log_b a})
+\end{equation*}
+(כאשר הביטוי $\Theta(n^{\log_b a})$ מייצג את העבודה הכוללת שמבוצעת על ידי העלים בתחתית).
+
+במקום לפתור אלגברית את הסכום המורכב הזה עבור כל אלגוריתם בנפרד, משפט האב פשוט רוצה לדעת כיצד הסכום הזה מתנהג \textbf{אסימפטוטית} - כלומר, איזו רמה של העץ שולטת בשטח הכולל כאשר גודל הבעיה $n$ שואף לאינסוף.
+\newpage
+\section*{המקרים של משפט האב}
+כדי לקבוע את ההתנהגות האסימפטוטית של $T(n)$, עלינו לבחון כיצד העבודה החישובית מתפלגת לאורך שכבות עץ הרקורסיה. בכל עומק, העבודה הכוללת נקבעת על ידי תחרות בין עבודת התקורה המתכווצת פר צומת, לבין מספר הצמתים הגדל מעריכית. שלושת המקרים של משפט האב תואמים ישירות לשלוש התוצאות האפשריות של תחרות זו: העבודה בעלים שולטת, העבודה בשורש שולטת, או שהעבודה מאוזנת באופן מושלם בכל הרמות.
+\vspace{0.5cm}
+\subsection*{מקרה 1: המשולש (כבד בתחתית)}
+
+\begin{tcolorbox}[colback=accent1!10, colframe=accent1, title=\textbf{התנאי}]
+$f(n) = O(n^{\log_b a - \epsilon})$ עבור קבוע כלשהו $\epsilon > 0$.
+\end{tcolorbox}
+\textbf{המקרה:} במקרה זה, העבודה המבוצעת בשורש ($f(n)$) קטנה פולינומית ממספר העלים העצום בתחתית העץ ($n^{\log_b a}$).
+
+\textbf{הגיאומטריה:} ככל שאתה יורד בעץ הרקורסיה, מספר הצמתים שולט בעבודה הכוללת. לכן, כמות העבודה הכוללת בכל רמה מתרחבת החוצה גיאומטרית. מכיוון שהמשקל החישובי מרוכז ברובו המכריע בתחתית, עץ הרקורסיה יוצר משולש רגיל העומד ביציבות על בסיסו הרחב.
+
+\textbf{התוצאה:} מכיוון שרוב מוחלט של העבודה מתבצע ברמת העלים, סיבוכיות הזמן הכוללת חסומה לחלוטין על ידי מספר העלים:
+\begin{equation*}
+    T(n) = \Theta(n^{\log_b a})
+\end{equation*}
+
+\vspace{0.5cm}
+\begin{center}
+\begin{tikzpicture}
+    % Draw Triangle
+    \fill[accent1!20] (0,0) -- (4,-4) -- (-4,-4) -- cycle;
+    \draw[accent1, thick] (0,0) -- (4,-4) -- (-4,-4) -- cycle;
+    
+    % Level lines
+    \draw[accent1!50, dashed] (-1,-1) -- (1,-1);
+    \draw[accent1!50, dashed] (-2,-2) -- (2,-2);
+    \draw[accent1!50, dashed] (-3,-3) -- (3,-3);
+    
+    % Labels (English in TikZ for layout stability, translating here requires careful bidirectional text, 
+    % but we will translate it directly).
+    \node[above] at (0,0) {קלה) (עבודה $f(n)$ שורש:};
+    \node[below] at (0,-4) {כבדה) (עבודה $n^{\log_b a}$ עלים:};
+    
+    % Arrows indicating growth
+    \draw[->, thick, secondary] (4.5, -0.5) -- (4.5, -3.5) node[midway, right] {רמה בכל גדלה העבודה};
+\end{tikzpicture}
+\end{center}
+\vspace{1cm}
+\newpage
+\subsection*{מקרה 2: המלבן (עבודה מאוזנת)}
+
+\begin{tcolorbox}[colback=accent3!10, colframe=accent3, title=\textbf{התנאי}]
+$f(n) = \Theta(n^{\log_b a})$
+\end{tcolorbox}
+\textbf{המקרה:} כאן, העבודה המבוצעת בשורש זהה פונקציונלית לעבודה המבוצעת לאורך רמת העלים.
+
+\textbf{הגיאומטריה:} עלות פיצול הבעיה לחלקים מקזזת בדיוק את הגודל המתכווץ של אותן תתי-בעיות. המשמעות היא שכל רמה בודדת בעץ הרקורסיה מבצעת בדיוק את אותה כמות עבודה כוללת. הצורה הגיאומטרית יוצרת צלעות אנכיות ישרות ואחידות, ויוצרת מלבן מושלם.
+
+\textbf{התוצאה:} מכיוון שכל רמה מבצעת את אותה כמות עבודה (שהיא פרופורציונלית ל-$f(n)$ או $n^{\log_b a}$), הזמן הכולל הוא פשוט העבודה של רמה אחת כפול גובה העץ (שהוא $\log n$):
+\begin{equation*}
+    T(n) = \Theta(n^{\log_b a} \log n)
+\end{equation*}
+
+\vspace{0.5cm}
+\begin{center}
+\begin{tikzpicture}
+    % Draw Rectangle
+    \fill[accent3!20] (-2.5,0) rectangle (2.5,-4);
+    \draw[accent3, thick] (-2.5,0) rectangle (2.5,-4);
+    
+    % Level lines
+    \draw[accent3!50, dashed] (-2.5,-1) -- (2.5,-1);
+    \draw[accent3!50, dashed] (-2.5,-2) -- (2.5,-2);
+    \draw[accent3!50, dashed] (-2.5,-3) -- (2.5,-3);
+    
+    % Labels
+    \node[above] at (0,0) {מאוזנת) (עבודה $f(n)$ שורש:};
+    \node[below] at (0,-4) {מאוזנת) (עבודה $n^{\log_b a}$ עלים:};
+    
+    % Arrows indicating constancy
+    \draw[<->, thick, secondary] (3.5, -0.5) -- (3.5, -3.5) node[midway, right] {רמה בכל קבועה העבודה};
+\end{tikzpicture}
+\end{center}
+\vspace{0.5cm}
+
+\subsection*{מקרה 3: המשולש ההפוך (כבד בראש)}
+
+\begin{tcolorbox}[colback=accent2!10, colframe=accent2, title=\textbf{התנאי}]
+$f(n) = \Omega(n^{\log_b a + \epsilon})$ עבור $\epsilon > 0$ כלשהו, \textbf{וגם} מקיים את תנאי הרגולריות: $a f(n/b) \le k f(n)$ עבור $k < 1$ כלשהו.
+\end{tcolorbox}
+
+\textbf{המקרה:} במקרה האחרון הזה, פונקציית השורש $f(n)$ גדולה פולינומית מספירת העלים.
+
+\textbf{הגיאומטריה:} העבודה מתכווצת באופן משמעותי בכל רמה עוקבת של עץ הרקורסיה. הנפח האדיר של המשקל החישובי יושב היטב בצומת העליון, ויוצר משולש הפוך המתאזן על קודקודו.
+
+(תנאי הרגולריות פשוט מבטיח שהצורה הולכת ומצרה בצורה חלקה כלפי מטה, ולא בולטת החוצה בצורה לא אחידה).
+
+\textbf{התוצאה:} מכיוון שהעבודה הכוללת נשלטת לחלוטין על ידי הרמה הראשונה, סיבוכיות הזמן הכוללת חסומה על ידי השורש:
+\begin{equation*}
+    T(n) = \Theta(f(n))
+\end{equation*}
+
+\vspace{0.5cm}
+\begin{center}
+\begin{tikzpicture}
+    % Draw Inverted Triangle
+    \fill[accent2!20] (-4,0) -- (4,0) -- (0,-4) -- cycle;
+    \draw[accent2, thick] (-4,0) -- (4,0) -- (0,-4) -- cycle;
+    
+    % Level lines
+    \draw[accent2!50, dashed] (-3,-1) -- (3,-1);
+    \draw[accent2!50, dashed] (-2,-2) -- (2,-2);
+    \draw[accent2!50, dashed] (-1,-3) -- (1,-3);
+    
+    % Labels
+    \node[above] at (0,0) {כבדה) (עבודה $f(n)$ שורש:};
+    \node[below] at (0,-4) {קלה) (עבודה $n^{\log_b a}$ עלים:};
+    
+    % Arrows indicating shrinkage
+    \draw[->, thick, secondary] (4.5, -0.5) -- (4.5, -3.5) node[midway, right] {רמה בכל קטנה העבודה};
+\end{tikzpicture}
+\end{center}
+
+
+\section*{טיפים לצוות ההוראה}
+
+\begin{itemize}
+
+    \item \textbf{בניית אינטואיציית הליבה}
+    \begin{itemize}
+        \item \textbf{ביסוס הנוסחה בעזרת דוגמאות:} שימוש באלגוריתמים מוכרים כמו מיון מיזוג וחיפוש בינארי חיוני להבנת נוסחת הרקורסיבית הכללית. על ידי הקצאת מספרים ופונקציות קונקרטיות לאלמנטים המופשטים של הנוסחה (כגון מיפוי $a$, $b$ ו-$f(n)$ לערכים המדויקים שלהם בכל אלגוריתם), סטודנטים יכולים להבין בבירור מה כל רכיב מתמטי מייצג בפועל.
+        \item \textbf{התמקדות ב"משיכת החבל" המרכזית:} כל סטודנט לומד אחרת; חלקם יתחברו לצורות הגיאומטריות, אחרים למבנה העץ, ואחרים לאלגברה. ללא קשר להעדפה שלהם, חשוב שכל הסטודנטים יבינו תחילה את אסטרטגיית ההפרד ומשול, ואת הנוסחה הרקורסיבית הבסיסית מייצגת. ברגע שהבסיס הזה קיים, ודאו שהם תופסים את "משיכת החבל" הבסיסית בין עבודת התקורה, $f(n)$, למספר המקסימלי של תתי-הבעיות בעלים, $n^{\log_b a}$. גם אם סטודנט נאבק במבנה העץ ובסכומים, הבנת הפשרה הבסיסית הזו מאפשרת לו להשתמש בהצלחה בצורות הגיאומטריות כדי לזכור וליישם את המשפט.
+    \end{itemize}
+
+    \item \textbf{ניווט בין ההמחשות הוויזואליות}
+    \begin{itemize}
+        \item \textbf{הבהרת האנלוגיה הגיאומטרית:} אם אתם משתמשים בצורות גיאומטריות כדי להמחיש את שלושת המקרים (כגון משולש לעבודה הכבדה למטה, מלבן לעבודה מאוזנת, או משולש הפוך לעבודה הכבדה למעלה), עשו הבחנה מפורשת בין אנלוגיות אלו למבנה הפיזי של עץ הרקורסיה. מכיוון שכל עץ רקורסיה מתרחב ויזואלית כלפי מטה לצורת משולש, סטודנטים עלולים להתבלבל בקלות. הדגישו בפני הכיתה שהצורות הגיאומטריות מייצגות את ה\textbf{כמות הכוללת של העבודה} שמתבצעת בכל רמה, ולא את הציור המילולי של הצמתים.
+        \item \textbf{צורות כאמצעי עזר לזיכרון:} הצורות הפיזיות יכולות לשמש כאמצעי עזר לזכירת אי-השוויונות. אם תציבו את $f(n)$ בראש הצורה ואת $n^{\log_b a}$ בתחתית, הצלעות המשופעות של המשולש הרגיל יוצרות חזותית סימן "$<$" (החלק העליון קטן יותר), הצלעות האנכיות של המלבן יוצרות סימן "$=$", והצלעות של המשולש ההפוך יוצרות סימן "$>$" (החלק העליון גדול יותר).
+        \item \textbf{המחשת תנאי הרגולריות:} תנאי הרגולריות במקרה השלישי יכול להיראות שרירותי. הסבירו שהוא פשוט מבטיח שעבודת התקורה של כל תת-בעיה גדולה ממש מהתקורה של תתי-הבעיות הבאות אחריה. אפקט ה"כיווץ" המובטח הזה הוא בדיוק מה שיוצר את הצלעות הנקיות, שהולכות ומצרות כלפי מטה, של המשולש ההפוך.
+    \end{itemize}
+
+    \item \textbf{התמודדות עם מתמטיקה וטיפים מתקדמים}
+    \begin{itemize}
+        \item \textbf{מעבר על חוקי לוגריתמים:} חוקי לוגריתמים הם לעתים קרובות אבן נגף, במיוחד כשמחשבים את מספר העלים. תחילה, הסבירו מדוע נוח יותר להשתמש ב-$n$ כבסיס במקום במעריך לצורך השוואת חסמים פולינומיים. לאחר מכן, עברו במפורש על הפיתוח: 
+        \[ a^{\log_b n} = (b^{\log_b a})^{\log_b n} = (b^{\log_b n})^{\log_b a} = n^{\log_b a} \]
+        \item \textbf{הפגת המסתורין מקבועי ה-$\epsilon$:} משתני ה-$\epsilon$ יכולים להיות חלק לא אינטואיטיבי במשפט הכללי. עוזר להסביר שהם מייצגים "אי-שוויון פולינומי \textbf{חזק/ממש}". לדוגמה, העבודה בשורש אינה רק גדולה יותר מהעבודה בעלים; היא חייבת להיות גדולה יותר \textbf{פולינומית} כדי לבסס את הצורה באופן מובהק.
+        \item \textbf{הימנעות מבלבול משתנים:} בתנאי הרגולריות למקרה השלישי, השתמשו בקבוע $k$ (כאשר $k < 1$) במקום ב-$c$. הדבר מונע מסטודנטים להתבלבל בינו לבין המעריך $c$ המשמש בגרסה הפולינומית והמפושטת של משפט האב (שבה $f(n) = O(n^c)$).
+        \item \textbf{קיצור הדרך של הרגולריות עבור מקרה 3:} ניתן להוכיח מתמטית שאם תנאי הרגולריות מתקיים, תנאי ה-$\Omega$ מתקיים באופן אינהרנטי. לכן, כדי להוכיח שנוסחת נסיגה מתאימה למקרה 3, הדגמת תנאי הרגולריות מספיקה מבחינה טכנית. לעומת זאת, אם ברצונכם להפריך במהירות את מקרה 3, עליכם רק להראות שתנאי ה-$\Omega$ נכשל. בעוד שקיצור דרך לוגי זה עלול לבלבל מתחילים, שיתופו יכול לספק טריק יעילות בעל ערך עבור הסטודנטים המתקדמים יותר שלכם.
+        \item \textbf{טיפול בהוכחות האלגבריות:} ההוכחות האלגבריות הפורמליות לכל מקרה כוללות מעברים צפופים שיכולים להיות קשים למעקב. עם זאת, עבור סטודנטים עם נטייה אלגברית חזקה יותר, מעבר על המתמטיקה הטהורה יכול למעשה לעזור לבסס את הבנתם את המשפט. כדי למנוע בלבול בקרב שאר הכיתה, ובשל מגבלות הזמן של התרגולים, מומלץ להציע הוכחות אלו כתרגיל רשות למתקדמים או לעבור עליהן לאחר השיעור עם סטודנטים המעוניינים בכך. (טיפ: לסטודנטים המנסים להוכיח את המקרה השלישי, הציעו את הטור ההנדסי האינסופי כרמז).
+    \end{itemize}
+
+\end{itemize}
+
+\end{document}

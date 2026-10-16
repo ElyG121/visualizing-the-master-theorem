@@ -1,0 +1,220 @@
+/* ---------- Tokens ---------- */
+:root {
+  --bg: #ffffff;
+  --surface: #f8fafc;
+  --text: #1e293b;
+  --muted: #475569;            /* LaTeX "secondary" */
+  --border: #e2e8f0;
+  --primary: #2563eb;          /* LaTeX "primary" */
+  --a1: #10b981;               /* accent1: green, case 1 */
+  --a2: #ef4444;               /* accent2: red, case 3 */
+  --a3: #f59e0b;               /* accent3: amber, case 2 */
+  --a1-ink: #047857;
+  --a2-ink: #b91c1c;
+  --a3-ink: #b45309;
+  --c2-blue: #4a76c1;          /* array boxes */
+  --c2-light: #badfe9;         /* split wedges */
+  --c2-border: #2b4c86;
+  --ink: #1e293b;              /* figure strokes */
+  --header-h: 60px;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f172a;
+    --surface: #1e293b;
+    --text: #e2e8f0;
+    --muted: #94a3b8;
+    --border: #334155;
+    --primary: #60a5fa;
+    --a1-ink: #34d399;
+    --a2-ink: #f87171;
+    --a3-ink: #fbbf24;
+    --c2-blue: #4a76c1;
+    --c2-light: #2d4f66;
+    --c2-border: #93b4ea;
+    --ink: #cbd5e1;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f172a;
+  --surface: #1e293b;
+  --text: #e2e8f0;
+  --muted: #94a3b8;
+  --border: #334155;
+  --primary: #60a5fa;
+  --a1-ink: #34d399;
+  --a2-ink: #f87171;
+  --a3-ink: #fbbf24;
+  --c2-blue: #4a76c1;
+  --c2-light: #2d4f66;
+  --c2-border: #93b4ea;
+  --ink: #cbd5e1;
+  color-scheme: dark;
+}
+
+/* ---------- Base ---------- */
+* { box-sizing: border-box; }
+html { scroll-padding-top: calc(var(--header-h) + 16px); }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: "Noto Sans", system-ui, sans-serif;
+  font-size: 17px;
+  line-height: 1.65;
+  -webkit-text-size-adjust: 100%;
+}
+html[lang="he"] body { font-family: "Noto Sans Hebrew", "Noto Sans", system-ui, sans-serif; }
+a { color: var(--primary); }
+strong { font-weight: 700; }
+
+/* Math always runs left to right, even inside Hebrew text */
+.katex { direction: ltr; unicode-bidi: isolate; font-size: 1.08em; }
+.katex-display { direction: ltr; overflow-x: auto; overflow-y: hidden; padding: 4px 0; }
+
+/* ---------- Header ---------- */
+.topbar {
+  position: sticky; top: 0; z-index: 10;
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--border);
+}
+.topbar-inner {
+  max-width: 1200px; margin: 0 auto;
+  min-height: var(--header-h);
+  padding: 8px 16px;
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  flex-wrap: wrap;
+}
+.brand { font-weight: 700; color: var(--text); text-decoration: none; font-size: 1rem; }
+.controls { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.seg {
+  display: inline-flex; border: 1px solid var(--border); border-radius: 8px; overflow: hidden;
+  background: var(--surface);
+}
+.seg button {
+  font: inherit; font-size: 0.875rem; padding: 5px 12px;
+  border: 0; background: transparent; color: var(--muted); cursor: pointer;
+}
+.seg button + button { border-inline-start: 1px solid var(--border); }
+.seg button[aria-pressed="true"] { background: var(--primary); color: #fff; font-weight: 600; }
+.seg button:focus-visible, .pdf-btn:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+.pdf-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 0.875rem; padding: 5px 12px; border-radius: 8px;
+  border: 1px solid var(--border); color: var(--text); text-decoration: none; background: var(--surface);
+}
+.pdf-btn:hover { border-color: var(--primary); }
+
+/* ---------- Layout ---------- */
+.layout {
+  max-width: 1200px; margin: 0 auto; padding: 0 16px;
+  display: grid; grid-template-columns: 240px minmax(0, 1fr); gap: 48px;
+}
+main { min-width: 0; max-width: 780px; padding: 24px 0 64px; }
+.toc { position: sticky; top: calc(var(--header-h) + 16px); align-self: start; padding-top: 32px; font-size: 0.875rem; max-height: calc(100vh - var(--header-h) - 32px); overflow-y: auto; }
+.toc summary { font-weight: 700; text-transform: uppercase; letter-spacing: .06em; font-size: .75rem; color: var(--muted); cursor: pointer; margin-bottom: 8px; }
+.toc ol { list-style: none; margin: 0; padding: 0; }
+.toc li a { display: block; padding: 4px 10px; color: var(--muted); text-decoration: none; border-inline-start: 2px solid var(--border); }
+.toc li.sub a { padding-inline-start: 22px; font-size: .8125rem; }
+.toc li a:hover { color: var(--text); }
+.toc li a.active { color: var(--primary); border-inline-start-color: var(--primary); }
+
+@media (max-width: 900px) {
+  .layout { grid-template-columns: minmax(0, 1fr); gap: 0; }
+  .toc { position: static; max-height: none; padding-top: 16px; }
+  .toc details { border: 1px solid var(--border); border-radius: 10px; padding: 8px 12px; background: var(--surface); }
+  .toc summary { margin: 0; }
+  .toc details[open] summary { margin-bottom: 8px; }
+}
+
+/* ---------- Audience switching ---------- */
+html[data-mode="student"] [data-audience="educator"],
+html[data-mode="educator"] [data-audience="student"] { display: none !important; }
+.edu-tag {
+  display: inline-block; font-size: .7rem; font-weight: 600; letter-spacing: .05em; text-transform: uppercase;
+  color: var(--primary); border: 1px solid currentColor; border-radius: 999px; padding: 0 8px; margin-bottom: 8px;
+}
+html[lang="he"] .edu-tag { text-transform: none; letter-spacing: 0; }
+
+/* ---------- Typography ---------- */
+.hero { padding: 24px 0 8px; border-bottom: 1px solid var(--border); margin-bottom: 8px; }
+.hero h1 { font-size: clamp(1.9rem, 5vw, 2.6rem); line-height: 1.15; margin: 0 0 8px; letter-spacing: -0.01em; }
+html[lang="he"] .hero h1 { letter-spacing: 0; }
+.hero .subtitle { color: var(--muted); margin: 0 0 16px; font-size: 1.1rem; }
+.shape-strip { display: flex; gap: 16px; align-items: center; margin: 8px 0 12px; }
+.shape-strip svg { width: 44px; height: 44px; }
+h2 { font-size: 1.6rem; line-height: 1.25; margin: 48px 0 12px; padding-top: 8px; }
+h3 { font-size: 1.25rem; margin: 32px 0 8px; }
+h4 { font-size: 1.05rem; margin: 24px 0 6px; }
+p { margin: 0 0 14px; }
+ul, ol { padding-inline-start: 24px; margin: 0 0 14px; }
+li { margin-bottom: 6px; }
+li > ul { margin-top: 6px; }
+section.edu-block { border-inline-start: 3px solid var(--primary); padding-inline-start: 16px; margin-top: 32px; }
+section.edu-block > h2:first-of-type, section.edu-block > h3:first-of-type { margin-top: 4px; }
+
+/* ---------- Condition boxes (tcolorbox) ---------- */
+.condition { border: 1.5px solid var(--c); border-radius: 8px; overflow: hidden; margin: 12px 0 18px; background: color-mix(in srgb, var(--c) 10%, var(--bg)); }
+.condition .cond-title { background: var(--c); color: #fff; font-weight: 700; padding: 4px 14px; font-size: .95rem; }
+.condition .cond-body { padding: 10px 14px; }
+.case-1 { --c: var(--a1); --c-ink: var(--a1-ink); }
+.case-2 { --c: var(--a3); --c-ink: var(--a3-ink); }
+.case-3 { --c: var(--a2); --c-ink: var(--a2-ink); }
+.case h3 { color: var(--c-ink); }
+
+/* ---------- Figures ---------- */
+figure { margin: 24px 0 28px; }
+figcaption { color: var(--muted); font-size: .9rem; margin-top: 10px; text-align: center; }
+.fig-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.fig-canvas { position: relative; container-type: inline-size; direction: ltr; margin: 0 auto; }
+.fig-canvas svg { display: block; width: 100%; height: auto; overflow: visible; }
+.fig-label {
+  position: absolute; white-space: nowrap; line-height: 1.2; color: var(--text);
+  font-size: calc(var(--fs, 2.2) * 1cqw);
+}
+.fig-label .katex { font-size: 1.05em; }
+.fig-label.bg { background: var(--bg); padding: 0 .2em; }
+.fig-label[lang="he"] { direction: rtl; unicode-bidi: isolate; font-family: "Noto Sans Hebrew", "Noto Sans", sans-serif; }
+.fig-tree { min-width: 680px; }
+
+/* SVG paint classes */
+.s-ink { stroke: var(--ink); fill: none; }
+.s-dot { stroke: var(--ink); fill: none; stroke-dasharray: 2 3; }
+.f-ink { fill: var(--ink); }
+.box { fill: var(--c2-blue); stroke: var(--c2-border); stroke-width: 1.6; }
+.wedge { fill: var(--c2-light); }
+.shape-fill { fill: color-mix(in srgb, var(--c) 20%, var(--bg)); stroke: var(--c); stroke-width: 2; }
+.shape-level { stroke: color-mix(in srgb, var(--c) 50%, var(--bg)); stroke-dasharray: 6 4; stroke-width: 1.2; }
+.shape-arrow { stroke: var(--muted); stroke-width: 2.2; fill: none; }
+.shape-arrow-head { fill: var(--muted); }
+
+/* ---------- Mnemonic strip ---------- */
+.mnemonic { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin: 20px 0 8px; }
+.mnemonic a { display: block; text-decoration: none; color: inherit; border: 1px solid var(--border); border-radius: 10px; padding: 12px; background: var(--surface); text-align: center; }
+.mnemonic a:hover { border-color: var(--c); }
+.mnemonic svg { width: 64px; height: 48px; display: block; margin: 0 auto 6px; }
+.mnemonic .m-name { font-weight: 700; color: var(--c-ink); display: block; }
+.mnemonic .m-rel { font-size: .9rem; color: var(--muted); display: block; }
+@media (max-width: 520px) { .mnemonic { grid-template-columns: minmax(0, 1fr); } }
+
+/* ---------- Footer ---------- */
+.footer { border-top: 1px solid var(--border); color: var(--muted); font-size: .875rem; text-align: center; padding: 24px 16px 40px; }
+.loading { color: var(--muted); }
+
+@media (max-width: 600px) {
+  body { font-size: 16px; }
+  .brand { font-size: .95rem; }
+  h2 { font-size: 1.4rem; }
+}
+@media print {
+  .topbar, .toc, .footer { display: none; }
+  .layout { display: block; }
+}
+
+/* Display line mixing Hebrew words and math */
+.eq-he { text-align: center; margin: 16px 0; font-size: 1.05rem; }
+/* Embedded English inside Hebrew text keeps its own direction */
+[dir="rtl"] [lang="en"] { unicode-bidi: isolate; }

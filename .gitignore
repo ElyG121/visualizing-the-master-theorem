@@ -1,0 +1,9 @@
+Master_Theorem_v1.zip
+_site/
+build/
+*.aux
+*.log
+*.fls
+*.fdb_latexmk
+*.xdv
+*.out

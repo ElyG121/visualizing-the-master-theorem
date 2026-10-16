@@ -1,0 +1,58 @@
+name: Build PDFs and deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install XeLaTeX and fonts
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            texlive-xetex texlive-latex-recommended texlive-latex-extra \
+            texlive-pictures texlive-lang-other latexmk \
+            fonts-noto-core fonts-liberation2
+
+      - name: Compile PDFs
+        run: |
+          mkdir -p _site/pdf build
+          compile() {
+            latexmk -xelatex -interaction=nonstopmode -halt-on-error -outdir=build "latex_src_files/$1.tex"
+            cp "build/$1.pdf" "_site/pdf/$2.pdf"
+          }
+          compile teaching_the_master_theorem              en-educator
+          compile teaching_the_master_theorem_students     en-student
+          compile teaching_the_master_theorem_heb          he-educator
+          compile teaching_the_master_theorem_students_heb he-student
+
+      - name: Assemble site
+        run: cp -r index.html css js content _site/
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
