@@ -34,6 +34,8 @@
   const tocList = document.getElementById('toc-list');
   const pdfLink = document.getElementById('pdf-link');
   const cache = {};
+  // Reuse the ?v= tag from this script's URL so bumping it in index.html also refreshes the content
+  const VERSION = new URL(document.currentScript.src).searchParams.get('v') || '';
   let state = { lang: 'en', mode: 'student' };
   let loadedLang = null;
 
@@ -76,7 +78,7 @@
 
   async function fetchContent(lang) {
     if (!cache[lang]) {
-      const res = await fetch(`content/${lang}.html`);
+      const res = await fetch(`content/${lang}.html?v=${VERSION}`);
       if (!res.ok) throw new Error(res.status);
       cache[lang] = await res.text();
     }
