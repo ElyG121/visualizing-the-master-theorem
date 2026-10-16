@@ -83,7 +83,7 @@ strong { font-weight: 700; }
 }
 .topbar-inner {
   max-width: 1200px; margin: 0 auto;
-  min-height: var(--header-h);
+  min-height: 60px;
   padding: 8px 16px;
   display: flex; align-items: center; justify-content: space-between; gap: 12px;
   flex-wrap: wrap;
