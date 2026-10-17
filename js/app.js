@@ -11,6 +11,7 @@
       student: 'Student', educator: 'Educator',
       pdf: 'PDF', pdfTitle: 'Download this version as a PDF',
       contents: 'Contents', loading: 'Loading…',
+      collapseAll: 'Collapse all', expandAll: 'Expand all',
       langGroup: 'Language', modeGroup: 'Audience',
       footer: 'Written in LaTeX, available as PDF in English and Hebrew.',
       source: 'Source on GitHub',
@@ -22,6 +23,7 @@
       student: 'סטודנטים', educator: 'צוות הוראה',
       pdf: 'PDF', pdfTitle: 'הורדת גרסה זו כקובץ PDF',
       contents: 'תוכן העניינים', loading: 'טוען…',
+      collapseAll: 'כיווץ הכל', expandAll: 'הרחבת הכל',
       langGroup: 'שפה', modeGroup: 'קהל יעד',
       footer: 'נכתב ב-LaTeX, זמין כ-PDF בעברית ובאנגלית.',
       source: 'קוד המקור ב-GitHub',
@@ -107,14 +109,61 @@
     loadedLang = state.lang;
     window.Figures.render(main, state.lang);
     renderMath(main);
+    makeCollapsible();
   }
+
+  // Wrap each heading of the given tag and the siblings that follow it (up to the next such heading)
+  // in an open <details>, with the heading itself as the <summary>.
+  function wrapSections(container, tag, level) {
+    let current = null;
+    [...container.children].forEach((el) => {
+      if (el.tagName === tag) {
+        current = document.createElement('details');
+        current.className = `sec sec-${level}`;
+        current.open = true;
+        const summary = document.createElement('summary');
+        el.before(current);
+        summary.appendChild(el);
+        current.appendChild(summary);
+      } else if (current && el.tagName !== 'SUMMARY') {
+        current.appendChild(el);
+      }
+    });
+  }
+
+  function makeCollapsible() {
+    wrapSections(main, 'H2', 2);
+    main.querySelectorAll('details.sec-2, section.case').forEach((c) => wrapSections(c, 'H3', 3));
+    updateToggleAll();
+  }
+
+  // Open every collapsed section that contains the element, so links into it work
+  function reveal(el) {
+    for (let d = el.closest('details.sec'); d; d = d.parentElement.closest('details.sec')) d.open = true;
+  }
+
+  const toggleAll = document.getElementById('toggle-all');
+  function updateToggleAll() {
+    const anyOpen = [...main.querySelectorAll('details.sec')].some((d) => d.open);
+    toggleAll.textContent = UI[state.lang][anyOpen ? 'collapseAll' : 'expandAll'];
+    toggleAll.dataset.action = anyOpen ? 'collapse' : 'expand';
+  }
+  toggleAll.addEventListener('click', () => {
+    const open = toggleAll.dataset.action === 'expand';
+    main.querySelectorAll('details.sec').forEach((d) => { d.open = open; });
+    updateToggleAll();
+  });
+  main.addEventListener('toggle', updateToggleAll, true);
 
   // Table of contents from visible h2/h3 headings
   let observer;
   function buildToc() {
     tocList.innerHTML = '';
     if (observer) observer.disconnect();
-    const heads = [...main.querySelectorAll('h2[id], h3[id]')].filter((h) => h.offsetParent !== null);
+    const heads = [...main.querySelectorAll('h2[id], h3[id]')].filter((h) => {
+      const aud = h.closest('[data-audience]');
+      return !aud || aud.dataset.audience === state.mode;
+    });
     const links = new Map();
     heads.forEach((h) => {
       const li = document.createElement('li');
@@ -145,6 +194,7 @@
     buildToc();
     if (location.hash) {
       const target = document.getElementById(decodeURIComponent(location.hash.slice(1)));
+      if (target) reveal(target);
       if (target && target.offsetParent !== null) target.scrollIntoView();
     }
   }
@@ -154,6 +204,11 @@
     const m = e.target.closest('[data-set-mode]');
     if (l && l.dataset.setLang !== state.lang) update({ lang: l.dataset.setLang });
     if (m && m.dataset.setMode !== state.mode) update({ mode: m.dataset.setMode });
+    const a = e.target.closest('a[href^="#"]');
+    if (a) {
+      const target = document.getElementById(decodeURIComponent(a.getAttribute('href').slice(1)));
+      if (target) reveal(target);
+    }
   });
 
   // Keep anchor offsets in sync with the sticky header, which wraps on small screens

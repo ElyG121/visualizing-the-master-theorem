@@ -217,3 +217,34 @@ figcaption { color: var(--muted); font-size: .9rem; margin-top: 10px; text-align
 .edu-tip .cond-body ul { margin: 0; }
 .edu-tip .cond-body li:last-child { margin-bottom: 0; }
 .hero .byline { margin: -8px 0 16px; font-weight: 600; color: var(--muted); }
+
+/* ---------- Collapsible sections ---------- */
+details.sec > summary {
+  list-style: none; cursor: pointer;
+  display: flex; align-items: center; gap: 10px;
+  border-radius: 6px;
+}
+details.sec > summary::-webkit-details-marker { display: none; }
+details.sec > summary > h2, details.sec > summary > h3 { margin: 0; }
+details.sec-2 > summary { margin: 40px 0 12px; padding-top: 8px; }
+details.sec-3 > summary { margin: 28px 0 8px; }
+/* Chevron: points down when open, toward the reading direction when closed */
+details.sec > summary::before {
+  content: ""; flex: none; width: .5em; height: .5em;
+  border-right: 2px solid var(--muted); border-bottom: 2px solid var(--muted);
+  transform: rotate(45deg); transition: transform .15s ease; margin-top: -0.2em;
+}
+details.sec:not([open]) > summary::before { transform: rotate(-45deg); margin-top: 0; }
+[dir="rtl"] details.sec:not([open]) > summary::before { transform: rotate(135deg); }
+details.sec > summary:hover::before { border-color: var(--primary); }
+details.sec > summary:hover > h2, details.sec > summary:hover > h3 { color: var(--primary); }
+.case details.sec > summary:hover > h3 { color: var(--c-ink); text-decoration: underline; text-underline-offset: 4px; }
+details.sec > summary:focus-visible { outline: 2px solid var(--primary); outline-offset: 4px; }
+.case > details.sec-3:first-child > summary { margin-top: 32px; }
+
+.toggle-all {
+  margin-top: 12px; font: inherit; font-size: .8125rem; color: var(--primary);
+  background: none; border: 1px solid var(--border); border-radius: 6px; padding: 4px 10px; cursor: pointer;
+}
+.toggle-all:hover { border-color: var(--primary); }
+@media print { details.sec > summary::before { display: none; } }
